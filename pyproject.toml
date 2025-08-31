@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "tit"
+version = "0.0.1"
+description = "ai git commits"
+authors = ["Jake Zuliani <jake@burla.dev>"]
+
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+fire = "^0.7.1"
+appdirs = ">=1.4"
+
+[tool.poetry.scripts]
+tit = "tit.__init__:init_cli"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
