@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tit"
+name = "giz"
 version = "0.0.1"
 description = "ai git commits"
 authors = ["Jake Zuliani <jake@burla.dev>"]
@@ -11,7 +11,7 @@ fire = "^0.7.1"
 appdirs = ">=1.4"
 
 [tool.poetry.scripts]
-tit = "tit.__init__:init_cli"
+giz = "giz.__init__:init_cli"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"

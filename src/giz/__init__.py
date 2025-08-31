@@ -5,18 +5,16 @@ from fire import Fire
 from appdirs import user_config_dir
 
 __version__ = "0.0.1"
-_appdata_dir = Path(user_config_dir(appname="tit", appauthor="tit"))
-CONFIG_PATH = _appdata_dir / Path("tit_config.json")
+_appdata_dir = Path(user_config_dir(appname="giz", appauthor="giz"))
+CONFIG_PATH = _appdata_dir / Path("giz_config.json")
 
 
 def version():
     print(__version__)
 
 
-def prompt():
-    print(f"Prompt located at {CONFIG_PATH}")
-    print(json.loads(CONFIG_PATH.read_text())["prompt"])
-    raise NotImplementedError("Not implemented")
+def config():
+    print(f"config located at {CONFIG_PATH}")
 
 
 def commit():
@@ -28,7 +26,7 @@ def init_cli():
     Fire(
         {
             "commit": commit,
-            "prompt": prompt,
+            "config": config,
             "--version": version,
             "-v": version,
         }
