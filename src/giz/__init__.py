@@ -4,7 +4,7 @@ from pathlib import Path
 from fire import Fire
 from appdirs import user_config_dir
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 _appdata_dir = Path(user_config_dir(appname="giz", appauthor="giz"))
 CONFIG_PATH = _appdata_dir / Path("giz_config.json")
 
