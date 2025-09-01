@@ -19,4 +19,4 @@ Default prompt: `Generate me a very concise, short commit message from the follo
 - `giz commit ...`
 
 
-<figure><img src="./demo.gif" alt="" style="width:80%" /></figure>
+<figure><img src="./demo.gif" alt="" style="width:100%" /></figure>
