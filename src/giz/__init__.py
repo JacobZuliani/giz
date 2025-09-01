@@ -1,5 +1,4 @@
 import json
-import sys
 import subprocess
 from pathlib import Path
 
@@ -17,16 +16,24 @@ model = json.loads(CONFIG_PATH.read_text() or "{}").get("model", "gpt-5-nano")
 openai_api_key = json.loads(CONFIG_PATH.read_text() or "{}").get("openai_api_key", "")
 CONFIG_PATH.write_text(json.dumps({"openai_api_key": openai_api_key, "model": model}))
 
-PROMPT_PATH = Path(user_config_dir("giz")) / "giz_prompt.txt"
+PROMPT_PATH = Path(user_config_dir("giz")) / "giz_prompt"
 PROMPT_PATH.parent.mkdir(parents=True, exist_ok=True)
 PROMPT_PATH.touch(exist_ok=True)
 if not PROMPT_PATH.read_text():
-    prompt = "Please generate me a simple concise commit message for the following git diff:"
+    prompt = "Generate me a very concise, short commit message from the following git diff:"
     PROMPT_PATH.write_text(prompt)
 
 
 def version():
     print(__version__)
+
+
+def print_promptfile_path():
+    print(f'Promptfile path: "{PROMPT_PATH}"')
+
+
+def print_configfile_path():
+    print(f'Configfile path: "{CONFIG_PATH}"')
 
 
 def set_api_key(value: str):
@@ -39,17 +46,6 @@ def set_api_key(value: str):
         print(f"API key updated successfully!")
     except Exception as e:
         print(f"Error testing API key!\n{e}")
-
-
-def set_model(value: str):
-    valid_models = ["gpt-5-nano", "gpt-5-mini", "gpt-5"]
-    if value in valid_models:
-        config = json.loads(CONFIG_PATH.read_text())
-        config["model"] = value
-        CONFIG_PATH.write_text(json.dumps(config))
-        print(f"Model updated successfully!")
-    else:
-        print(f"Invalid model: {value}. Allowed values are: {', '.join(valid_models)}")
 
 
 def commit(yes: bool = False):
@@ -74,10 +70,8 @@ def commit(yes: bool = False):
     commit_message = response.choices[0].message.content.strip()
     print(f"\n{commit_message}\n")
 
-    if yes or ("-y" in sys.argv) or ("--yes" in sys.argv):
-        # subprocess.run(["git", "commit", "-m", commit_message], check=True)
-        print("Committed.")
-        return
+    if yes:
+        subprocess.run(["git", "commit", "-m", commit_message], check=True)
     else:
         confirm = input("Would you like to commit? [Y/n]: ").strip().lower()
         if confirm in ("", "y", "yes"):
@@ -91,7 +85,8 @@ def init_cli():
         {
             "commit": commit,
             "set_openai_api_key": set_api_key,
-            "set_model": set_model,
+            "configfile": print_configfile_path,
+            "promptfile": print_promptfile_path,
             "--version": version,
             "-v": version,
         }
