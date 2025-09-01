@@ -7,7 +7,7 @@ from openai import OpenAI
 from yaspin import yaspin
 from platformdirs import user_config_dir
 
-__version__ = "0.0.2"
+__version__ = "1.0.0"
 
 CONFIG_PATH = Path(user_config_dir("giz")) / "giz_config.json"
 CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)

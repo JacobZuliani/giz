@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "giz"
-version = "0.0.2"
-description = "AI git commits"
+version = "1.0.0"
+description = "AI git commit"
 authors = ["Jake Zuliani <jake@burla.dev>"]
 
 
