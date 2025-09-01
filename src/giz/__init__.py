@@ -1,4 +1,5 @@
 import json
+import sys
 import subprocess
 from pathlib import Path
 
@@ -51,7 +52,7 @@ def set_model(value: str):
         print(f"Invalid model: {value}. Allowed values are: {', '.join(valid_models)}")
 
 
-def commit():
+def commit(yes: bool = False):
     config = json.loads(CONFIG_PATH.read_text())
     if not config.get("openai_api_key"):
         print(f"API key not set. Please set API key first with: `giz set_openai_api_key <api_key>`")
@@ -59,6 +60,10 @@ def commit():
 
     cmd = ["git", "diff", "--staged"]
     diff_text = subprocess.run(cmd, stdout=subprocess.PIPE, text=True, check=True).stdout
+    if not diff_text:
+        print("No changes to commit.")
+        return
+
     with yaspin() as spinner:
         spinner.start()
         client = OpenAI(api_key=config["openai_api_key"])
@@ -69,11 +74,16 @@ def commit():
     commit_message = response.choices[0].message.content.strip()
     print(f"\n{commit_message}\n")
 
-    confirm = input("Would you like to commit? [Y/n]: ").strip().lower()
-    if confirm in ("", "y", "yes"):
-        subprocess.run(["git", "commit", "-m", commit_message], check=True)
+    if yes or ("-y" in sys.argv) or ("--yes" in sys.argv):
+        # subprocess.run(["git", "commit", "-m", commit_message], check=True)
+        print("Committed.")
+        return
     else:
-        print("Aborted.")
+        confirm = input("Would you like to commit? [Y/n]: ").strip().lower()
+        if confirm in ("", "y", "yes"):
+            subprocess.run(["git", "commit", "-m", commit_message], check=True)
+        else:
+            print("Aborted.")
 
 
 def init_cli():
