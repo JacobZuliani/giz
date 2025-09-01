@@ -18,5 +18,5 @@ Default prompt: `Generate me a very concise, short commit message from the follo
 - `giz set_openai_api_key <your-api-key>`
 - `giz commit ...`
 
-
+### Demo:
 <figure><img src="./demo.gif" alt="" style="width:100%" /></figure>
