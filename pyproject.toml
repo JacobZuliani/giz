@@ -1,19 +1,19 @@
 [tool.poetry]
 name = "giz"
 version = "1.0.0"
-description = "AI git commit"
+description = "Drop in `git commit` replacement with AI commit message."
 authors = ["Jake Zuliani <jake@burla.dev>"]
 
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-fire = "^0.7.1"
 platformdirs = "^4.4.0"
 openai = ">=1.0,<2.0"
 yaspin = "^3.1.0"
+typer = "^0.17.3"
 
 [tool.poetry.scripts]
-giz = "giz.__init__:init_cli"
+giz = "giz:init_cli"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
