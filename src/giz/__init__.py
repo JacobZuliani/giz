@@ -114,15 +114,6 @@ def commit(yes: bool = False):
     commit_message = response.choices[0].message.content.strip()
     print(f"\n{commit_message}\n")
 
-    if yes:
-        subprocess.run(["git", "commit", "-m", commit_message], check=True)
-    else:
-        confirm = input("Would you like to commit? [Y/n]: ").strip().lower()
-        if confirm in ("", "y", "yes"):
-            subprocess.run(["git", "commit", "-m", commit_message], check=True)
-        else:
-            print("Aborted.")
-
     yes_flag, forwarded_arguments = _collect_passthrough_arguments()
     commit_command = ["git", "commit", "-m", commit_message, *forwarded_arguments]
 
