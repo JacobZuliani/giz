@@ -1,14 +1,16 @@
 [tool.poetry]
 name = "giz"
 version = "0.0.2"
-description = "ai git commits"
+description = "AI git commits"
 authors = ["Jake Zuliani <jake@burla.dev>"]
 
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 fire = "^0.7.1"
-appdirs = ">=1.4"
+platformdirs = "^4.4.0"
+openai = ">=1.0,<2.0"
+yaspin = "^3.1.0"
 
 [tool.poetry.scripts]
 giz = "giz.__init__:init_cli"
