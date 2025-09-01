@@ -33,8 +33,16 @@ if not PROMPT_PATH.read_text():
     PROMPT_PATH.write_text(prompt)
 
 
+COMMIT_HELP_MESSAGE = """
+Drop-in `git commit` replacement with an AI commit message.
+
+** EXTRA ARGS **\n
+Any extra args are forwarded to `git commit` (e.g. --amend, --message, --no-verify, -S).
+"""
+
+
 @app.command(
-    help="Drop-in `git commit` replacement with an AI commit message.",
+    help=COMMIT_HELP_MESSAGE,
     context_settings={
         "allow_extra_args": True,
         "ignore_unknown_options": True,
@@ -45,13 +53,6 @@ def commit(
     ctx: Context,
     yes: bool = Option(False, "--yes", "-y", help="Auto-accept the AI commit message."),
     message: Optional[str] = Option(None, "--message", "-m", hidden=True),
-    _documentation_only_placeholder: bool = Option(
-        False,
-        "**Extras",
-        help="Extra args are forwarded to `git commit` (e.g. --amend, --message, --no-verify, -S).",
-        is_flag=True,
-        expose_value=False,
-    ),
 ):
     yes = yes or message
     config = json.loads(CONFIG_PATH.read_text() or "{}")
@@ -74,13 +75,17 @@ def commit(
         message = response.choices[0].message.content.strip()
         print(f"\n{message}\n")
 
-    commit_command = ["git", "commit", "-m", message, *list(ctx.args)]
-    if yes and diff_text:
-        subprocess.run(commit_command, check=True)
+    if message:
+        commit_command = ["git", "commit", "-m", message, *list(ctx.args)]
+    else:
+        commit_command = ["git", "commit", *list(ctx.args)]
+
+    if yes or (not diff_text):
+        subprocess.run(commit_command)
     else:
         confirmation = input("Would you like to commit? [Y/n]: ").strip().lower()
         if confirmation in ("", "y", "yes"):
-            subprocess.run(commit_command, check=True)
+            subprocess.run(commit_command)
         else:
             print("Aborted.")
 
