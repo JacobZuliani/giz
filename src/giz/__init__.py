@@ -1,7 +1,7 @@
 import json
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 from typer import Context, Option
@@ -34,18 +34,26 @@ if not PROMPT_PATH.read_text():
 
 
 @app.command(
+    help="Drop-in `git commit` replacement with an AI commit message.",
     context_settings={
         "allow_extra_args": True,
         "ignore_unknown_options": True,
         "help_option_names": ["-h", "--help"],
-    }
+    },
 )
 def commit(
     ctx: Context,
     yes: bool = Option(False, "--yes", "-y", help="Auto-accept the AI commit message."),
     message: Optional[str] = Option(None, "--message", "-m", hidden=True),
+    _documentation_only_placeholder: bool = Option(
+        False,
+        "**Extras",
+        help="Extra args are forwarded to `git commit` (e.g. --amend, --message, --no-verify, -S).",
+        is_flag=True,
+        expose_value=False,
+    ),
 ):
-    commit_message = message
+    yes = yes or message
     config = json.loads(CONFIG_PATH.read_text() or "{}")
     if not config.get("openai_api_key"):
         print("API key not set. Set it with: `giz set_openai_api_key <api_key>`")
@@ -53,22 +61,21 @@ def commit(
 
     cmd = ["git", "diff", "--staged"]
     diff_text = subprocess.run(cmd, stdout=subprocess.PIPE, text=True, check=True).stdout
-    if not diff_text:
-        print("No staged changes to commit.")
-        raise typer.Exit(code=0)
-
-    if not commit_message:
+    if (not message) and diff_text:
         with yaspin():
             client = OpenAI(api_key=config["openai_api_key"])
-            system_message = {"role": "system", "content": "You are a commit message generator."}
-            user_message = {"role": "user", "content": f"{PROMPT_PATH.read_text()}\n\n{diff_text}"}
-            prompt = [system_message, user_message]
-            response = client.chat.completions.create(model=config["model"], messages=prompt)
-        commit_message = response.choices[0].message.content.strip()
-        print(f"\n{commit_message}\n")
+            response = client.chat.completions.create(
+                model=config["model"],
+                messages=[
+                    {"role": "system", "content": "You are a commit message generator."},
+                    {"role": "user", "content": f"{PROMPT_PATH.read_text()}\n\n{diff_text}"},
+                ],
+            )
+        message = response.choices[0].message.content.strip()
+        print(f"\n{message}\n")
 
-    commit_command = ["git", "commit", "-m", commit_message, *list(ctx.args)]
-    if yes:
+    commit_command = ["git", "commit", "-m", message, *list(ctx.args)]
+    if yes and diff_text:
         subprocess.run(commit_command, check=True)
     else:
         confirmation = input("Would you like to commit? [Y/n]: ").strip().lower()
