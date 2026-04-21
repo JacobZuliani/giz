@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "giz"
-version = "1.0.0"
+version = "1.1.0"
 description = "Drop in `git commit` replacement with AI commit message."
 authors = ["Jake Zuliani <jake@burla.dev>"]
 

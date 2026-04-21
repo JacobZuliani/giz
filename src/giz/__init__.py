@@ -9,7 +9,7 @@ from openai import OpenAI
 from platformdirs import user_config_dir
 from yaspin import yaspin
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 app = typer.Typer(
     add_completion=False,
     context_settings={"help_option_names": ["-h", "--help"]},
@@ -21,16 +21,39 @@ CONFIG_PATH = Path(user_config_dir("giz")) / "giz_config.json"
 CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
 CONFIG_PATH.touch(exist_ok=True)
 config_value = json.loads(CONFIG_PATH.read_text() or "{}")
-model_value = config_value.get("model", "gpt-5-mini")
+model_value = config_value.get("model", "gpt-4.1-nano")
+if model_value == "gpt-5-nano":  # migrate away from previous (slower) default
+    model_value = "gpt-4.1-nano"
 api_key_value = config_value.get("openai_api_key", "")
 CONFIG_PATH.write_text(json.dumps({"openai_api_key": api_key_value, "model": model_value}))
 
 PROMPT_PATH = Path(user_config_dir("giz")) / "giz_prompt"
 PROMPT_PATH.parent.mkdir(parents=True, exist_ok=True)
 PROMPT_PATH.touch(exist_ok=True)
-if not PROMPT_PATH.read_text():
-    prompt = "Generate me a very concise, short commit message from the following git diff:"
-    PROMPT_PATH.write_text(prompt)
+_OLD_DEFAULT_PROMPT = (
+    "Generate me a very concise, short commit message from the following git diff:"
+)
+_DEFAULT_PROMPT = """\
+Write a git commit message for the following diff.
+
+Default to a single line. Most commits need nothing more.
+
+Format:
+- Line 1: concise imperative summary, under 60 characters.
+- Only add a blank line and 1-3 short bullets when the diff contains multiple \
+distinct, non-obvious changes that each deserve mention. When in doubt, omit them.
+
+Rules:
+- Use imperative mood ("Add", "Fix", "Refactor"), never past tense.
+- Describe intent and impact, not file-by-file mechanics.
+- Mention filenames only when essential for understanding.
+- Never add filler bullets (e.g., "improves code quality", "enhances maintainability", \
+"for better readability"). If a bullet restates the summary, delete it.
+- Do not start the summary with redundant words like "new" after "Add", or "now" after "Fix".
+- Output only the commit message itself — no quotes, code fences, preamble, or sign-off."""
+_current_prompt = PROMPT_PATH.read_text()
+if (not _current_prompt) or _current_prompt == _OLD_DEFAULT_PROMPT:
+    PROMPT_PATH.write_text(_DEFAULT_PROMPT)
 
 
 COMMIT_HELP_MESSAGE = """
@@ -97,7 +120,7 @@ def set_api_key(value: str):
     try:
         messages = [{"role": "user", "content": "Hello"}]
         with yaspin(text="Testing API key..."):
-            OpenAI(api_key=value).chat.completions.create(model="gpt-5-nano", messages=messages)
+            OpenAI(api_key=value).chat.completions.create(model="gpt-4.1-nano", messages=messages)
         CONFIG_PATH.write_text(json.dumps(config))
         print("API key updated successfully!")
     except Exception as error:
