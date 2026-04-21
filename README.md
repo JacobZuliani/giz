@@ -1,5 +1,7 @@
 ## Giz
-_Drop in `git commit` replacement with AI commit message._
+_Drop in `git commit` replacement with AI commit message._  
+  
+Have any suggestions, or errors? Please send me an email! jake@burla.dev
 
 ### `giz commit` behaves exactly like `git commit`
 With one exception: The commit message is AI generated when no `-m` or `--message` argument is passed.
